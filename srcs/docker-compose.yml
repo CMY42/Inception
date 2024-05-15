@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - wordpress_network
+
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER_FILE: /run/secrets/db_user
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - wordpress_network
+
+  nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - ./srcs/requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./srcs/requirements/nginx/certs:/etc/nginx/certs
+    networks:
+      - wordpress_network
+
+networks:
+  wordpress_network:
+
+volumes:
+  mariadb_data:
+  wordpress_data:
+
