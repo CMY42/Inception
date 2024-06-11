@@ -1,7 +1,7 @@
 # Utilisation de l'image Alpine Linux
 FROM alpine:3.14
 
-# Installation de NGINX
+# Installation de NGINX et OpenSSL
 RUN apk --no-cache add nginx openssl
 
 # Création du répertoire pour les certificats

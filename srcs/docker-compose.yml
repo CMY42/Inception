@@ -2,39 +2,46 @@ version: '3'
 
 services:
   mariadb:
-    image: mariadb:latest
+    build:
+      context: ./requirements/mariadb
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress_user
-      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./logs/mariadb:/var/log/mysql
     networks:
       - wordpress_network
 
   wordpress:
-    image: wordpress:latest
+    build:
+      context: ./requirements/wordpress
     restart: always
     environment:
       WORDPRESS_DB_HOST: mariadb:3306
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DB_USER_FILE: /run/secrets/db_user
-      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - wordpress_data:/var/www/html
+      - ./logs/php7:/var/log/php7
     networks:
       - wordpress_network
 
   nginx:
-    image: nginx:latest
+    build:
+      context: ./requirements/nginx
     restart: always
     ports:
       - "443:443"
     volumes:
-      - ./srcs/requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - ./srcs/requirements/nginx/certs:/etc/nginx/certs
+      - ./requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./logs/nginx:/var/log/nginx
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
     networks:
       - wordpress_network
 
@@ -44,4 +51,3 @@ networks:
 volumes:
   mariadb_data:
   wordpress_data:
-
