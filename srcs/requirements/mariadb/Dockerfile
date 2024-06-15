@@ -1,21 +1,21 @@
-# Utilisation de l'image Alpine Linux
 FROM alpine:3.14
 
-# Installez MariaDB
+# Installer MariaDB
 RUN apk --no-cache add mariadb mariadb-client
 
-# Créez un utilisateur pour MariaDB
-RUN addgroup -S mariadb && adduser -S -G mariadb mariadb
-
-# Créez les répertoires nécessaires et changez le propriétaire des répertoires de MariaDB
+# Créer les répertoires nécessaires et ajuster les permissions
 RUN mkdir -p /var/lib/mysql /var/run/mysqld && \
-    chown -R mariadb:mariadb /var/lib/mysql /var/run/mysqld
+    chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
 
-# Exposez le port MySQL
-EXPOSE 3306
-
-# Copiez le script SQL pour créer un utilisateur dans MariaDB
+# Copier le script d'initialisation SQL
 COPY tools/init.sql /docker-entrypoint-initdb.d/
 
-# Définissez le point d'entrée pour MariaDB
-CMD ["mysqld", "--user=mariadb"]
+# Copier le script de démarrage
+COPY tools/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Exposer le port 3306
+EXPOSE 3306
+
+# Commande de démarrage
+ENTRYPOINT ["docker-entrypoint.sh"]

@@ -14,6 +14,10 @@ down:
 
 clean: down
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) rm -f
+	@if [ -n "$$(sudo docker ps -q)" ]; then sudo docker stop $$(sudo docker ps -q); fi
+	docker volume prune -f
+	docker network prune -f
+	docker system prune -f
 
 re: clean all
 

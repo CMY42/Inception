@@ -12,7 +12,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./logs/mariadb:/var/log/mysql
     networks:
       - wordpress_network
 
@@ -27,7 +26,6 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - wordpress_data:/var/www/html
-      - ./logs/php7:/var/log/php7
     networks:
       - wordpress_network
 
@@ -39,9 +37,6 @@ services:
       - "443:443"
     volumes:
       - ./requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - ./logs/nginx:/var/log/nginx
-    environment:
-      DOMAIN_NAME: ${DOMAIN_NAME}
     networks:
       - wordpress_network
 

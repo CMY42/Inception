@@ -1,5 +1,11 @@
--- Crée un utilisateur 'myuser' avec le mot de passe 'mypassword'
-CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
+-- Créer la base de données WordPress
+CREATE DATABASE IF NOT EXISTS wordpress;
 
--- Accorde tous les privilèges à l'utilisateur 'myuser' sur toutes les bases de données
-GRANT ALL PRIVILEGES ON *.* TO 'myuser'@'localhost';
+-- Créer un utilisateur 'wp_user' avec le mot de passe 'wp_password'
+CREATE USER 'wp_user'@'%' IDENTIFIED BY 'wp_password';
+
+-- Accorder tous les privilèges à l'utilisateur 'wp_user' sur la base de données WordPress
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wp_user'@'%';
+
+-- Appliquer les changements de privilèges
+FLUSH PRIVILEGES;
