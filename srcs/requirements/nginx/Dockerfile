@@ -17,8 +17,8 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 RUN adduser -D -g 'www' www
 
 # Création du répertoire pour les PID de NGINX et ajustement des permissions
-RUN mkdir -p /run/nginx && \
-    chown -R www:www /run/nginx
+RUN mkdir -p /run/nginx /var/log/nginx && \
+    chown -R www:www /run/nginx /var/log/nginx
 
 # Copie des fichiers de configuration NGINX
 COPY conf/nginx.conf /etc/nginx/nginx.conf

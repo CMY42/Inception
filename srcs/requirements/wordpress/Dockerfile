@@ -1,25 +1,30 @@
 FROM alpine:3.14
 
-# Installer les dépendances
+# Installer les dépendances nécessaires
 RUN apk --no-cache add php7 php7-fpm php7-mysqli php7-json php7-openssl php7-curl php7-zlib php7-xml php7-phar php7-intl php7-dom php7-xmlreader php7-ctype php7-session curl
 
-# Copier les fichiers de configuration
+# Installer wp-cli
+RUN apk add --no-cache curl
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+
+# Copier les fichiers de configuration PHP-FPM
 COPY conf/php-fpm.conf /etc/php7/php-fpm.conf
 COPY conf/www.conf /etc/php7/php-fpm.d/www.conf
 
-# Télécharger et installer WordPress
+# Créer le répertoire pour PHP-FPM PID s'il n'existe pas
+RUN mkdir -p /run/php/
+
+# Créer le répertoire pour WordPress avec les bonnes permissions
 RUN mkdir -p /var/www/html && \
-    curl -o wordpress.tar.gz https://wordpress.org/latest.tar.gz && \
-    tar -xzf wordpress.tar.gz -C /var/www/html --strip-components=1 && \
-    rm wordpress.tar.gz
+    chown -R nobody:www-data /var/www/html /run/php/ && \
+    chmod -R 755 /var/www/html
 
-# Créer le répertoire pour le PID de PHP-FPM
-RUN mkdir -p /run/php && chown -R nobody:nobody /run/php
+# Télécharger et installer WordPress avec wp-cli
+RUN su nobody -s /bin/sh -c "wp core download --path=/var/www/html"
 
-# Ajuster les permissions
-RUN chown -R nobody:nobody /var/www/html
-
-# Exposer le port 9000
+# Exposer le port 9000 (PHP-FPM)
 EXPOSE 9000
 
 # Commande pour démarrer PHP-FPM
