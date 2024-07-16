@@ -37,6 +37,8 @@ services:
       - /home/login/data/nginx/logs:/var/log/nginx
     networks:
       - wordpress_network
+    depends_on:
+      - wordpress
 
 networks:
   wordpress_network:
