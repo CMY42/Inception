@@ -35,8 +35,5 @@ RUN mkdir -p /var/www/html && \
 # Exposer le port 9000 (PHP-FPM)
 EXPOSE 9000
 
-# Définir le point d'entrée comme le script personnalisé
-#ENTRYPOINT ["docker-entrypoint.sh"]
-
 # Commande par défaut pour démarrer PHP-FPM
 CMD ["php-fpm7", "-F"]
