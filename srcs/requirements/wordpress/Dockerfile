@@ -24,6 +24,10 @@ COPY conf/www.conf /etc/php7/php-fpm.d/www.conf
 COPY tools/setup_wordpress.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/setup_wordpress.sh
 
+# Copier le script d'entrée personnalisé pour WordPress
+COPY tools/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Créer le répertoire pour PHP-FPM PID s'il n'existe pas
 RUN mkdir -p /run/php/
 
@@ -34,6 +38,9 @@ RUN mkdir -p /var/www/html && \
 
 # Exposer le port 9000 (PHP-FPM)
 EXPOSE 9000
+
+# Définir le point d'entrée comme le script personnalisé
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Commande par défaut pour démarrer PHP-FPM
 CMD ["php-fpm7", "-F"]
