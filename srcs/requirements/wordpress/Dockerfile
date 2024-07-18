@@ -20,9 +20,9 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 COPY conf/php-fpm.conf /etc/php7/php-fpm.conf
 COPY conf/www.conf /etc/php7/php-fpm.d/www.conf
 
-# Copier le script d'entrée personnalisé pour WordPress
-#COPY tools/docker-entrypoint.sh /usr/local/bin/
-#RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Copier le script WordPress
+COPY tools/setup_wordpress.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/setup_wordpress.sh
 
 # Créer le répertoire pour PHP-FPM PID s'il n'existe pas
 RUN mkdir -p /run/php/
