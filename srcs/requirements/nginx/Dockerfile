@@ -1,30 +1,28 @@
-# Utilisation de l'image Alpine Linux
-FROM alpine:3.14
+FROM debian:buster
 
-# Installation de NGINX et OpenSSL
-RUN apk --no-cache add nginx openssl
+# Installation de nginx et openssl en une seule commande pour réduire les couches
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y nginx openssl
 
-# Création du répertoire pour les certificats
-RUN mkdir -p /etc/nginx/certs
+# Configuration SSL
+RUN mkdir -p /etc/nginx/ssl && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/nginx/ssl/inception.key \
+    -out /etc/nginx/ssl/inception.crt \
+    -subj "/C=SW/ST=VS/L=Lausanne/O=42/OU=42/CN=cmansey.42.ch/emailAddress=cmansey@student.42lausanne.ch"
 
-# Génération du certificat auto-signé
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/certs/nginx-selfsigned.key \
-    -out /etc/nginx/certs/nginx-selfsigned.crt \
-    -subj "/C=FR/ST=Paris/L=Paris/O=42 School/OU=Student/CN=cmansey.42.fr"
+# Création des répertoires nécessaires et configuration des droits
+RUN mkdir -p /var/run/nginx /var/www/wordpress && \
+    chmod -R 755 /var/www/wordpress && \
+    chown -R www-data:www-data /var/www/wordpress
 
-# Créer l'utilisateur et le groupe www
-RUN adduser -D -g 'www' www
-
-# Création du répertoire pour les PID de NGINX et ajustement des permissions
-RUN mkdir -p /run/nginx /var/log/nginx && \
-    chown -R www:www /run/nginx /var/log/nginx
-
-# Copie des fichiers de configuration NGINX
+# Copie du fichier de configuration et du script de démarrage
 COPY conf/nginx.conf /etc/nginx/nginx.conf
+COPY tools/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Exposition du port 443 pour HTTPS
+# Exposition du port 443 pour SSL
 EXPOSE 443
 
-# Commande par défaut pour démarrer NGINX
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

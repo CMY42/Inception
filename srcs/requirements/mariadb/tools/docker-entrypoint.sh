@@ -1,29 +1,28 @@
-#!/bin/sh
+echo "MariaDB en cours d'initialisation..."
 
-# Initialiser la base de données si nécessaire
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Initializing database..."
-    mysql_install_db --user=mysql --ldata=/var/lib/mysql
-    # Démarrer MariaDB en arrière-plan pour exécuter les scripts d'initialisation
-    mysqld --user=mysql --skip-networking &
-    mysql_pid=$!
+# Initialisation de la base de données
+mysqld --initialize --user=mysql --datadir=/var/lib/mysql;
 
-    # Attendre que MariaDB soit prêt
-    while ! mysqladmin ping --silent; do
-        sleep 1
-    done
+chown -R mysql:mysql /var/lib/mysql;
+chown -R mysql:mysql /run/mysqld;
 
-    echo "Running init.sql script..."
-    # Exécuter les scripts d'initialisation
-    mysql -u root < /docker-entrypoint-initdb.d/init.sql
+# Lancement de mariadb en arrière plan
+mysqld --user=mysql --datadir=/var/lib/mysql &
 
-    echo "Shutting down initialization server..."
-    # Arrêter MariaDB
-    mysqladmin shutdown -uroot
+pid=$!
 
-    # Supprimer le PID du processus MySQL
-    rm -f /var/run/mysqld/mysqld.pid
-fi
+# Attente de la fin de lancement de mariadb
+sleep 10
 
-# Démarrer MariaDB en mode foreground
-exec mysqld --user=mysql --console
+# Configuration de la base de données
+mysql -u root -p${MARIADB_ROOT_PASSWORD} -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';"
+mysql -u root -p${MARIADB_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${MARIADB_DB_NAME};"
+mysql -u root -p${MARIADB_ROOT_PASSWORD} -e "CREATE USER IF NOT EXISTS '${MARIADB_USER}' IDENTIFIED BY '${MARIADB_PASS}';"
+mysql -u root -p${MARIADB_ROOT_PASSWORD} -e "GRANT ALL PRIVILEGES ON *.* TO '${MARIADB_USER}';"
+mysql -u root -p${MARIADB_ROOT_PASSWORD} -e "FLUSH PRIVILEGES;"
+
+# Kill de mysqld
+kill "$pid"
+
+# Remplacement du processus shell par mysqld
+exec mysqld --user=mysql --datadir=/var/lib/mysql

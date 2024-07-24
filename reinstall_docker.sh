@@ -8,11 +8,11 @@
 #sudo systemctl start docker
 
 # Forcer la suppression des conteneurs
-#sudo docker stop $(sudo docker ps -qa) || true
+#sudo docker stop $(sudo docker ps -qa)
 #sudo docker rm -f $(sudo docker ps -qa)
 #sudo docker rmi -f $(sudo docker images -qa)
 #sudo docker volume rm $(sudo docker volume ls -q)
-#sudo docker network rm $(sudo docker network ls -q)
+#sudo docker network rm $(docker network ls -q) 2>/dev/null
 
 # Vérification des permissions
 #sudo usermod -aG docker $USER

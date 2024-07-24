@@ -1,22 +1,18 @@
-# Utilisation d'une image Alpine pour réduire la taille et améliorer la sécurité
-FROM alpine:3.14
+FROM debian:buster
 
-# Installer MariaDB et le client MariaDB
-RUN apk --no-cache add mariadb mariadb-client
+#Installation de mariaDB
+RUN apt update -y && apt upgrade -y
+RUN apt-get install -y mariadb-server procps
 
-# Créer les répertoires nécessaires et ajuster les permissions
-RUN mkdir -p /var/lib/mysql /var/run/mysqld && \
-    chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+#Creation du repertoire de travail
+RUN mkdir -p /run/mysqld /var/lib/mysql
 
-# Copier le script d'initialisation SQL
-COPY tools/init.sql /docker-entrypoint-initdb.d/
+#Copie des fichiers de configuration et du script de démarrage
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY tools/docker-entrypoint.sh /usr/local/docker-entrypoint.sh
+RUN chmod +x /usr/local/docker-entrypoint.sh
 
-# Copier le script de démarrage personnalisé
-COPY tools/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Exposer le port 3306 pour MariaDB
+#Port de connexion
 EXPOSE 3306
 
-# Commande de démarrage de MariaDB
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT [ "sh", "/usr/local/docker-entrypoint.sh" ]
