@@ -42,6 +42,9 @@ Whether you use macOS or Linux, open your Terminal application.
 Run cd ~/. ssh/ in your Terminal.
 If the folder exists, run ls and check if a pair of key exists : id_ed25519 and id_ed25519. pub.
 Using id_rsa and id_rsa. pub is fine too. We are just advocating the use of ed25519.
+scp -P 4242 /Users/cmansey/.ssh/id_rsa cmansey@127.0.0.1:/home/cmansey/.ssh
+scp -P 4242 /Users/cmansey/.ssh/id_rsa.pub cmansey@127.0.0.1:/home/cmansey/.ssh
+scp -P 4242 /Users/cmansey/.ssh/known_hosts cmansey@127.0.0.1:/home/cmansey/.ssh
 
 ////Normalement pas besoin sur la VM le makefile devrait s'en charger mais verifier////
 mkdir -p /home/cmy/data/mariadb
